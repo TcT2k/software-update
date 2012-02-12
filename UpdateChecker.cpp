@@ -96,11 +96,10 @@ bool UpdateChecker::CheckForUpdate()
 		StringToVersion(cfg.Read(wxT("Software/Version")), updateVersion);
 		result = IsVersionNewer(m_softwareVersion, updateVersion);
 		if (result)
-			m_updateDownloadURL = cfg.Read(wxT("Software/DownloadURL"));
+			m_updateInfoFileName = tempFileName.GetFullPath();
 		else
 			SaveCheckDate();
 
-		wxRemoveFile(tempFileName.GetFullPath());
 	}
 
 	return result;
@@ -149,18 +148,25 @@ void UpdateChecker::OnUpdateProgress(wxThreadEvent& event)
 
 void UpdateChecker::OnUpdateFinished(wxThreadEvent& event)
 {
+	if (!m_updateInfoFileName.empty())
+		wxRemoveFile(m_updateInfoFileName);
+
 	delete m_progDlg;
 	m_progDlg = NULL;
 }
 
 wxThread::ExitCode UpdateChecker::Entry()
 {
-	wxLogDebug("Thread entry...");
-
 	wxFileName tempFileName;
 
+	// Load info file
+	wxFile cfgFile(m_updateInfoFileName);
+	wxFileInputStream cfgIStr(cfgFile);
+	wxFileConfig cfg(cfgIStr);
+	cfgFile.Close();
+
 	// Download update
-	wxURL url(m_updateDownloadURL);
+	wxURL url(cfg.Read(wxT("Software/DownloadURL")));
 	wxInputStream* istr = url.GetInputStream();
 	if (istr)
 	{
@@ -203,10 +209,29 @@ wxThread::ExitCode UpdateChecker::Entry()
 		delete istr;
 	}
 
-	// Verfiy update
+	//TODO: Verify update 
 
 	// Start update
 
+	wxString targetName = cfg.Read(wxT("Software/FileName"));
+
+	if (targetName.empty())
+	{
+		// Extract filename from download URL
+		wxFileName targetURLPath;
+		targetURLPath.Assign(url.GetPath(), wxPATH_UNIX);
+		targetName = targetURLPath.GetFullName();
+	}
+
+	// Create temp folder to move file with original filename
+	wxFileName targetFileName;
+	targetFileName.AssignTempFileName("SU");
+	wxRemoveFile(targetFileName.GetFullPath());
+	targetFileName.Assign(targetFileName.GetFullPath(), targetName);
+	targetFileName.Mkdir();
+	wxRenameFile(tempFileName.GetFullPath(), targetFileName.GetFullPath(), true);
+
+	wxLaunchDefaultApplication(targetFileName.GetFullPath(), 0);
 
 	wxQueueEvent(this, new wxThreadEvent(wxEVT_UPDATE_FINISHED));
 	return (wxThread::ExitCode)0; 

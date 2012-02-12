@@ -21,8 +21,14 @@ bool SoftwareUpdateApp::OnInit()
 	if (!wxApp::OnInit())
 		return false;
 
-	UpdateChecker checker;
+	return true;
+}
 
+int SoftwareUpdateApp::OnRun()
+{
+	int result = 0;
+
+	UpdateChecker checker;
 	if (checker.IsCheckRequired())
 	{
 		if (checker.CheckForUpdate())
@@ -30,10 +36,10 @@ bool SoftwareUpdateApp::OnInit()
 			if (checker.ConfirmUpdate())
 			{
 				checker.ApplyUpdate();
-				return true;
+				result = wxApp::OnRun();
 			}
 		}
 	}
 
-	return false;
+	return result;
 }
