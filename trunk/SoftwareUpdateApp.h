@@ -11,6 +11,7 @@ public:
 	~SoftwareUpdateApp();
 
     virtual bool OnInit();
+	virtual int OnRun();
 private:
 };
 

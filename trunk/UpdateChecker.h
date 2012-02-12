@@ -42,7 +42,7 @@ private:
 	wxUint32 m_softwareUpdateInterval;	// Update interval in days
 
 	// Update information
-	wxString m_updateDownloadURL;
+	wxString m_updateInfoFileName;
 	bool m_updateDownloadCanceled;
 
 	// UI
