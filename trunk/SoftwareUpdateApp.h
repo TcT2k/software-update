@@ -12,7 +12,19 @@ public:
 
     virtual bool OnInit();
 	virtual int OnRun();
+
+	virtual void OnInitCmdLine(wxCmdLineParser &parser);
+	virtual bool OnCmdLineParsed(wxCmdLineParser &parser);
 private:
+	enum LaunchMode
+	{
+		LaunchStandalone,
+		LaunchCheck,
+		LaunchUpdate
+	};
+
+	LaunchMode m_launchMode;
+	wxString m_updateFileName;
 };
 
 #endif // SoftwareUpdateApp__INCLUDED
