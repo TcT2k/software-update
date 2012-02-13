@@ -27,6 +27,12 @@ public:
 	// Download and start the update
 	void ApplyUpdate();
 
+	const wxString& GetSoftwareTitle() const;
+
+	const wxString& GetUpdateInfoFileName() const;
+
+	void SetUpdateInfoFileName(const wxString& fileName);
+
 protected:
 	wxThread::ExitCode Entry();
 
@@ -66,5 +72,25 @@ private:
 
 	static bool IsVersionNewer(const SoftwareVersion& v1, const SoftwareVersion& v2);
 };
+
+//
+// inlines
+//
+
+inline const wxString& UpdateChecker::GetSoftwareTitle() const
+{
+	return m_softwareTitle;
+}
+
+inline const wxString& UpdateChecker::GetUpdateInfoFileName() const
+{
+	return m_updateInfoFileName;
+}
+
+inline void UpdateChecker::SetUpdateInfoFileName(const wxString& fileName)
+{
+	m_updateInfoFileName = fileName;
+}
+
 
 #endif // UpdateChecker__INCLUDED
